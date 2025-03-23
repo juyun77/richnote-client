@@ -1,173 +1,84 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import StoreForm from "../components/StoreForm";
 
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(to right, #1e3a8a, #1f2937);
-`;
+// import axios from "axios";
+import "../style/SettingsPage.css";
 
-const Card = styled.div`
-  width: 100%;
-  max-width: 500px;
-  padding: 3rem;
-  background-color: #1f2937;
-  border-radius: 12px;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
-  color: white;
-  text-align: center;
-`;
+interface Store {
+  id: number;
+  storeName: string;
+  address: string;
+  phone: string;
+}
 
-const Title = styled.h2`
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: center;
-  width: 100%;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.2rem;
-  border-radius: 8px;
-  background: #374151;
-  border: none;
-  color: white;
-  text-align: center;
-  &:focus {
-    outline: 3px solid #3b82f6;
-  }
-`;
-
-const Button = styled.button`
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  cursor: pointer;
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-export default function StoreRegistration() {
-  const [storeName, setStoreName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [category, setCategory] = useState("");
-
-  // 고정 비용 항목
-  const [deposit, setDeposit] = useState(""); // 보증금
-  const [premium, setPremium] = useState(""); // 권리금
-  const [rent, setRent] = useState(""); // 월세
-  const [maintenance, setMaintenance] = useState(""); // 관리비
-
-  const [error, setError] = useState("");
+export default function SettingsPage() {
+  const [stores, setStores] = useState<Store[]>([]);
   const navigate = useNavigate();
 
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
+  useEffect(() => {
+    // 더미 데이터로 테스트
+    const dummyStores: Store[] = [
+      {
+        id: 1,
+        storeName: "제로스토어 강남점",
+        address: "서울특별시 강남구 테헤란로 123",
+        phone: "010-1234-5678",
+      },
+      {
+        id: 2,
+        storeName: "제로스토어 신림점",
+        address: "서울특별시 관악구 신림로 456",
+        phone: "010-8765-4321",
+      },
+    ];
+    setStores(dummyStores);
+  }, []);
 
-    // 가게 등록 요청 (백엔드 연동 시)
-    // try {
-    //   const response = await axios.post("https://api.example.com/store", {
-    //     storeName,
-    //     address,
-    //     phone,
-    //     category,
-    //     deposit,
-    //     premium,
-    //     rent,
-    //     maintenance,
-    //   });
-    //   navigate("/dashboard");
-    // } catch (err) {
-    //   setError(err.response?.data?.message || "등록 실패");
-    // }
+  const handleDelete = (storeId: number) => {
+    if (window.confirm("정말 삭제하시겠습니까?")) {
+      setStores(stores.filter((store) => store.id !== storeId));
+    }
   };
 
   return (
-    <Container>
-      <Card>
-        <Title>가게 등록</Title>
-        <Form onSubmit={handleRegister}>
-          <Input
-            type="text"
-            placeholder="가게 이름"
-            value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="주소"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="전화번호"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-          />
-          <Input
-            type="text"
-            placeholder="업종"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-          />
+    <div className="settings-container">
+      <h2 className="settings-title">내 매장 목록</h2>
 
-          {/* 고정 지출 입력 */}
-          <Input
-            type="number"
-            placeholder="보증금 (원)"
-            value={deposit}
-            onChange={(e) => setDeposit(e.target.value)}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="권리금 (원)"
-            value={premium}
-            onChange={(e) => setPremium(e.target.value)}
-          />
-          <Input
-            type="number"
-            placeholder="월세 (원)"
-            value={rent}
-            onChange={(e) => setRent(e.target.value)}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="관리비 (원)"
-            value={maintenance}
-            onChange={(e) => setMaintenance(e.target.value)}
-          />
+      <div style={{ textAlign: "right", marginBottom: "20px" }}>
+        <button
+          onClick={() => navigate("/store/register")}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          매장 등록
+        </button>
+      </div>
 
-          {error && <p style={{ color: "red", fontSize: "1rem" }}>{error}</p>}
-          <Button type="submit">등록하기</Button>
-        </Form>
-      </Card>
-    </Container>
+      <div className="store-list">
+        {stores.map((store) => (
+          <div key={store.id} className="store-card">
+            <h3>{store.storeName}</h3>
+            <p>{store.address}</p>
+            <p>전화번호: {store.phone}</p>
+            <div className="store-actions">
+              <Link to={`/store/${store.id}`}>상세보기</Link>
+              <button onClick={() => navigate(`/store/${store.id}/edit`)}>
+                수정
+              </button>
+              <button onClick={() => handleDelete(store.id)}>삭제</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
+
+// StoreForm 컴포넌트를 따로 생성해, props로 mode("create" / "edit")와 초기값(store)을 받아 재사용하면 됩니다.

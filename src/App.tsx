@@ -6,6 +6,9 @@ import LoginPage from "./pages/LoginPage";
 // import SalesPage from "./pages/SalesPage";
 // import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
+import ExpensePage from "./pages/ExpensePage";
+import StoreForm from "./components/StoreForm";
+import SalesRecordPage from "./pages/SalesRecordPage";
 
 function App() {
   return (
@@ -18,6 +21,13 @@ function App() {
         {/* <Route path="/sales" element={<SalesPage />} />
         <Route path="/reports" element={<ReportsPage />} /> */}
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/expenses" element={<ExpensePage />} />
+        <Route path="/salesRecord" element={<SalesRecordPage />} />
+        <Route path="/store/register" element={<StoreForm mode="create" />} />
+        <Route
+          path="/store/:storeId/edit"
+          element={<StoreForm mode="edit" />}
+        />
       </Routes>
     </>
   );

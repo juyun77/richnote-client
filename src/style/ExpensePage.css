@@ -1,0 +1,134 @@
+/* ExpensePage.css */
+
+.expense-page-container {
+  background: linear-gradient(135deg, #f5f5f5, #ffffff);
+  padding: 2rem;
+  max-width: 700px;
+  margin: 2rem auto;
+  border-radius: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.expense-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+/* 년도 + 월 선택 래퍼 */
+.select-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem; /* 셀렉트 사이 간격 */
+  margin-bottom: 2rem;
+}
+
+/* 셀렉트박스 공통 스타일 */
+.year-select,
+.month-select {
+  padding: 0.7rem 1rem;
+  font-size: 1.1rem;
+  border-radius: 1rem;
+  border: 1px solid #bbb;
+  background-color: #fafafa;
+  cursor: pointer;
+  color: #333;
+}
+
+/* 지출 항목 리스트 래퍼 */
+.expenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* 각 지출 항목(행) */
+.expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 남는 공간 활용 */
+  background-color: #f0f0f0;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.expense-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* 공통 인풋 스타일 */
+.expense-input {
+  flex: 1; /* 같은 줄에서 공간 분배 */
+  padding: 0.5rem;
+  margin-right: 0.5rem; /* 두 입력칸 사이 간격 */
+  border: 1px solid #bbb;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.3s;
+  background-color: #f8f8f8;
+}
+
+.expense-input:focus {
+  border-color: #888;
+  box-shadow: 0 0 0 3px rgba(136, 136, 136, 0.1);
+  background-color: #fff;
+}
+
+/* 삭제 버튼 */
+.remove-button {
+  background-color: #e74c3c; /* 붉은 계열 */
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.remove-button:hover {
+  background-color: #c0392b;
+}
+
+/* 항목 추가 버튼 */
+.add-button {
+  display: block;
+  margin: 0 auto 1rem; /* 중앙 정렬 + 아래쪽 여백 */
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #2980b9;
+}
+
+/* 저장 버튼 */
+.save-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(to right, #999, #666);
+  border: none;
+  border-radius: 1.5rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.save-button:hover {
+  background: linear-gradient(to right, #777, #444);
+}

@@ -1,0 +1,66 @@
+/* SettingsPage.css */
+
+.settings-container {
+  padding: 100px 20px 40px; /* 상단 여백 크게 추가 */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settings-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.store-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.store-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.store-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.store-card h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.store-card p {
+  margin: 4px 0;
+  color: #555;
+}
+
+.store-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.store-actions button,
+.store-actions a {
+  padding: 6px 10px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.store-actions button:hover,
+.store-actions a:hover {
+  background-color: #45a049;
+}
