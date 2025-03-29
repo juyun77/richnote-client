@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import StoreForm from "../components/StoreForm";
-
-// import axios from "axios";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../style/SettingsPage.css";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 interface Store {
   id: number;
   storeName: string;
   address: string;
-  phone: string;
+  phoneNumber: string;
 }
 
 export default function SettingsPage() {
@@ -17,32 +19,51 @@ export default function SettingsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 더미 데이터로 테스트
-    const dummyStores: Store[] = [
-      {
-        id: 1,
-        storeName: "제로스토어 강남점",
-        address: "서울특별시 강남구 테헤란로 123",
-        phone: "010-1234-5678",
-      },
-      {
-        id: 2,
-        storeName: "제로스토어 신림점",
-        address: "서울특별시 관악구 신림로 456",
-        phone: "010-8765-4321",
-      },
-    ];
-    setStores(dummyStores);
-  }, []);
+    const checkLoginAndFetchStores = async () => {
+      try {
+        const loginRes = await axios.get(`${API_BASE_URL}/users/checkLogin`, {
+          withCredentials: true,
+        });
+        if (!loginRes.data.isLoggedIn) {
+          //toast.warn("로그인이 필요합니다.");
+          navigate("/login");
+          return;
+        }
 
-  const handleDelete = (storeId: number) => {
+        const user = loginRes.data.user;
+
+        const storesRes = await axios.get(`${API_BASE_URL}/stores/${user.id}`, {
+          withCredentials: true,
+        });
+        setStores(storesRes.data);
+      } catch (err) {
+        console.error("에러 발생:", err);
+        toast.error("서버 연결 오류, 로그인 페이지로 이동합니다.");
+        navigate("/login");
+      }
+    };
+
+    checkLoginAndFetchStores();
+  }, [navigate]);
+
+  const handleDelete = async (storeId: number) => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
-      setStores(stores.filter((store) => store.id !== storeId));
+      try {
+        await axios.delete(`${API_BASE_URL}/stores/${storeId}`, {
+          withCredentials: true,
+        });
+        setStores(stores.filter((store) => store.id !== storeId));
+        toast.success("매장이 삭제되었습니다.");
+      } catch (err) {
+        console.error("삭제 오류:", err);
+        toast.error("삭제 중 문제가 발생했습니다.");
+      }
     }
   };
 
   return (
     <div className="settings-container">
+      <ToastContainer position="top-center" autoClose={2000} hideProgressBar />
       <h2 className="settings-title">내 매장 목록</h2>
 
       <div style={{ textAlign: "right", marginBottom: "20px" }}>
@@ -62,11 +83,16 @@ export default function SettingsPage() {
       </div>
 
       <div className="store-list">
+        {stores.length === 0 && (
+          <p style={{ textAlign: "center", color: "#888" }}>
+            등록된 매장이 없습니다.
+          </p>
+        )}
         {stores.map((store) => (
           <div key={store.id} className="store-card">
             <h3>{store.storeName}</h3>
             <p>{store.address}</p>
-            <p>전화번호: {store.phone}</p>
+            <p>전화번호: {store.phoneNumber}</p>
             <div className="store-actions">
               <Link to={`/store/${store.id}`}>상세보기</Link>
               <button onClick={() => navigate(`/store/${store.id}/edit`)}>
@@ -80,5 +106,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-// StoreForm 컴포넌트를 따로 생성해, props로 mode("create" / "edit")와 초기값(store)을 받아 재사용하면 됩니다.

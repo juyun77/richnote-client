@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../style/StoreRegistration.css";
+
 interface StoreFormProps {
   mode: "create" | "edit";
   initialData?: {
@@ -14,6 +16,8 @@ interface StoreFormProps {
     initialInvestment?: string;
   };
 }
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function StoreForm({ mode, initialData }: StoreFormProps) {
   const [storeName, setStoreName] = useState(initialData?.storeName || "");
@@ -39,33 +43,39 @@ export default function StoreForm({ mode, initialData }: StoreFormProps) {
     }).open();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // mode에 따라 create 또는 edit 처리 분기
-    if (mode === "create") {
-      console.log("매장 등록:", {
-        storeName,
-        address,
-        phone,
-        deposit,
-        premium,
-        rent,
-        maintenance,
-        initialInvestment,
-      });
-    } else {
-      console.log("매장 수정:", {
-        storeName,
-        address,
-        phone,
-        deposit,
-        premium,
-        rent,
-        maintenance,
-        initialInvestment,
-      });
+
+    const payload = {
+      storeName,
+      address,
+      phoneNumber: phone,
+      deposit: Number(deposit),
+      premium: Number(premium),
+      monthlyRent: Number(rent),
+      maintenanceFee: Number(maintenance),
+      initialInvestment: Number(initialInvestment),
+    };
+
+    try {
+      if (mode === "create") {
+        await axios.post(`${API_BASE_URL}/stores/`, payload, {
+          withCredentials: true,
+        });
+        alert("매장 등록 완료!");
+      } else {
+        // 수정인 경우
+        await axios.put(
+          `${API_BASE_URL}/stores/${initialData?.storeName}`,
+          payload,
+          { withCredentials: true }
+        );
+        alert("매장 정보 수정 완료!");
+      }
+      navigate("/settings");
+    } catch (error) {
+      console.error(`${mode === "create" ? "등록" : "수정"} 실패:`, error);
     }
-    navigate("/settings");
   };
 
   return (
@@ -164,9 +174,7 @@ export default function StoreForm({ mode, initialData }: StoreFormProps) {
         </div>
 
         <div className="store-form-group">
-          <span className="store-description">
-            초기 투자 비용 (인테리어, 집기 등) (원)
-          </span>
+          <span className="store-description">초기 투자 비용 (원)</span>
           <input
             type="number"
             placeholder="금액 (₩)"

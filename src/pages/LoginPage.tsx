@@ -112,10 +112,8 @@ export default function LoginPage() {
   };
 
   const handleKakaoLogin = () => {
-    window.location.href =
-      "https://kauth.kakao.com/oauth/authorize?client_id=YOUR_KAKAO_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code";
+    window.location.href = "http://localhost:8081/api/users/kakao";
   };
-
   return (
     <Container>
       <Card>

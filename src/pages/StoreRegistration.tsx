@@ -1,22 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../style/StoreRegistration.css";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export default function StoreRegistration() {
   const [storeName, setStoreName] = useState("");
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [category, setCategory] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [deposit, setDeposit] = useState("");
   const [premium, setPremium] = useState("");
   const [rent, setRent] = useState("");
   const [maintenance, setMaintenance] = useState("");
   const [initialInvestment, setInitialInvestment] = useState("");
+  const [userId, setUserId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // 📌 **카카오 주소 검색 API 실행**
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/users/checkLogin`, {
+          withCredentials: true,
+        });
+        if (res.data.isLoggedIn) {
+          setUserId(res.data.user.id);
+        } else {
+          toast.warn("로그인이 필요합니다.", {
+            autoClose: 2000,
+            onClose: () => navigate("/login"),
+          });
+        }
+      } catch (err) {
+        console.error("로그인 상태 확인 실패", err);
+        toast.error("로그인 확인 중 오류 발생", {
+          autoClose: 2000,
+          onClose: () => navigate("/login"),
+        });
+      }
+    };
+
+    fetchUser();
+  }, [navigate]);
+
   const handleAddressSearch = () => {
     new window.daum.Postcode({
       oncomplete: (data: { address: string }) => {
@@ -25,10 +54,53 @@ export default function StoreRegistration() {
     }).open();
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!storeName || !address || !phoneNumber || !deposit || !rent) {
+      setError("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    const storeData = {
+      userId,
+      storeName,
+      address,
+      phoneNumber,
+      deposit: Number(deposit),
+      premium: Number(premium),
+      monthlyRent: Number(rent),
+      maintenanceFee: Number(maintenance),
+      initialInvestment: Number(initialInvestment),
+    };
+
+    console.log("보낼 데이터 확인:", storeData);
+
+    try {
+      await axios.post(`${API_BASE_URL}/stores/`, storeData, {
+        withCredentials: true,
+      });
+
+      toast.success("매장이 성공적으로 등록되었습니다.", {
+        autoClose: 2500,
+        onClose: () => navigate("/settings"),
+      });
+    } catch (err) {
+      console.error("등록 오류:", err);
+      toast.error("매장 등록 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="store-container">
+      <ToastContainer
+        position="top-center"
+        autoClose={2500}
+        hideProgressBar
+        pauseOnHover={false}
+      />
       <h2 className="store-title">매장 등록</h2>
-      <form className="store-form">
+      <form className="store-form" onSubmit={handleSubmit}>
         <div className="store-form-group">
           <span className="store-description">매장 이름</span>
           <input
@@ -67,20 +139,8 @@ export default function StoreRegistration() {
           <input
             type="text"
             placeholder="숫자만 입력"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-            className="store-input"
-          />
-        </div>
-
-        <div className="store-form-group">
-          <span className="store-description">업종</span>
-          <input
-            type="text"
-            placeholder="업종 입력"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             required
             className="store-input"
           />

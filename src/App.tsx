@@ -9,6 +9,9 @@ import SettingsPage from "./pages/SettingsPage";
 import ExpensePage from "./pages/ExpensePage";
 import StoreForm from "./components/StoreForm";
 import SalesRecordPage from "./pages/SalesRecordPage";
+import StoreRegistration from "./pages/StoreRegistration";
+import StoreEditPage from "./pages/StoreEditPage";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -23,11 +26,8 @@ function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/expenses" element={<ExpensePage />} />
         <Route path="/salesRecord" element={<SalesRecordPage />} />
-        <Route path="/store/register" element={<StoreForm mode="create" />} />
-        <Route
-          path="/store/:storeId/edit"
-          element={<StoreForm mode="edit" />}
-        />
+        <Route path="/store/register" element={<StoreRegistration />} />
+        <Route path="/store/:storeId/edit" element={<StoreEditPage />} />
       </Routes>
     </>
   );

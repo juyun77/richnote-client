@@ -1,13 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import logo from "../assets/logo.png";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faHouse } from "@fortawesome/free-solid-svg-icons";
-
+import axios from "axios";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +18,23 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 로그인 버튼 클릭 시 처리 함수
+  const handleLoginClick = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/users/checkLogin`, {
+        withCredentials: true,
+      });
+      if (res.data.isLoggedIn) {
+        navigate("/settings");
+      } else {
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error("로그인 상태 확인 오류:", err);
+      navigate("/login");
+    }
+  };
 
   return (
     <motion.nav
@@ -76,12 +95,15 @@ const Navbar = () => {
             whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.3 }}
           >
-            <Link to="/login" style={styles.icon}>
+            <button
+              onClick={handleLoginClick}
+              style={{ all: "unset", cursor: "pointer" }}
+            >
               <FontAwesomeIcon
                 icon={faUser}
                 style={{ fontSize: "30px", color: "#333" }}
               />
-            </Link>
+            </button>
           </motion.div>
         </div>
       </div>
@@ -101,7 +123,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderBottom: "2px solid transparent",
     zIndex: 1000,
     display: "flex",
-    justifyContent: "center", // 네비게이션을 중앙에 배치
+    justifyContent: "center",
   },
   navScrolled: {
     background: "rgba(255, 255, 255, 1)",
@@ -109,7 +131,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   navContainer: {
     width: "100%",
-    maxWidth: "1440px", // 데스크탑 화면 최대 너비 설정
+    maxWidth: "1440px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -149,7 +171,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   rightSection: {
     display: "flex",
     gap: "20px",
-    flexWrap: "nowrap", // 줄바꿈 방지
+    flexWrap: "nowrap",
     alignItems: "center",
   },
   icon: {
