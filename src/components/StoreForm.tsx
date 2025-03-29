@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+// StoreForm.tsx
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../style/StoreRegistration.css";
+import "../style/StoreForm.css";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 interface StoreFormProps {
   mode: "create" | "edit";
@@ -9,182 +12,134 @@ interface StoreFormProps {
     storeName: string;
     address: string;
     phone: string;
-    deposit?: string;
-    premium?: string;
-    rent?: string;
-    maintenance?: string;
-    initialInvestment?: string;
+    deposit: string;
+    premium: string;
+    rent: string;
+    maintenance: string;
+    initialInvestment: string;
   };
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
 export default function StoreForm({ mode, initialData }: StoreFormProps) {
-  const [storeName, setStoreName] = useState(initialData?.storeName || "");
-  const [address, setAddress] = useState(initialData?.address || "");
-  const [phone, setPhone] = useState(initialData?.phone || "");
-  const [deposit, setDeposit] = useState(initialData?.deposit || "");
-  const [premium, setPremium] = useState(initialData?.premium || "");
-  const [rent, setRent] = useState(initialData?.rent || "");
-  const [maintenance, setMaintenance] = useState(
-    initialData?.maintenance || ""
-  );
-  const [initialInvestment, setInitialInvestment] = useState(
-    initialData?.initialInvestment || ""
-  );
-
   const navigate = useNavigate();
 
-  const handleAddressSearch = () => {
-    new window.daum.Postcode({
-      oncomplete: (data: { address: string }) => {
-        setAddress(data.address);
-      },
-    }).open();
+  const [form, setForm] = useState({
+    storeName: initialData?.storeName || "",
+    address: initialData?.address || "",
+    phone: initialData?.phone || "",
+    deposit: initialData?.deposit || "0",
+    premium: initialData?.premium || "0",
+    rent: initialData?.rent || "0",
+    maintenance: initialData?.maintenance || "0",
+    initialInvestment: initialData?.initialInvestment || "0",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      storeName,
-      address,
-      phoneNumber: phone,
-      deposit: Number(deposit),
-      premium: Number(premium),
-      monthlyRent: Number(rent),
-      maintenanceFee: Number(maintenance),
-      initialInvestment: Number(initialInvestment),
-    };
-
     try {
+      const payload = {
+        storeName: form.storeName,
+        address: form.address,
+        phoneNumber: form.phone,
+        deposit: parseInt(form.deposit),
+        premium: parseInt(form.premium),
+        monthlyRent: parseInt(form.rent),
+        maintenanceFee: parseInt(form.maintenance),
+        initialInvestment: parseInt(form.initialInvestment),
+      };
+
       if (mode === "create") {
-        await axios.post(`${API_BASE_URL}/stores/`, payload, {
+        await axios.post(`${API_BASE_URL}/stores`, payload, {
           withCredentials: true,
         });
-        alert("매장 등록 완료!");
       } else {
-        // 수정인 경우
-        await axios.put(
-          `${API_BASE_URL}/stores/${initialData?.storeName}`,
-          payload,
-          { withCredentials: true }
-        );
-        alert("매장 정보 수정 완료!");
+        const id = window.location.pathname.split("/").at(-2); // ✅ 수정된 부분
+        await axios.patch(`${API_BASE_URL}/stores/${id}`, payload, {
+          withCredentials: true,
+        });
       }
+
+      alert("저장되었습니다.");
       navigate("/settings");
-    } catch (error) {
-      console.error(`${mode === "create" ? "등록" : "수정"} 실패:`, error);
+    } catch (err) {
+      console.error("저장 실패:", err);
+      alert("저장 중 오류 발생");
     }
   };
 
   return (
-    <div className="store-container">
-      <h2 className="store-title">
-        {mode === "create" ? "매장 등록" : "매장 수정"}
-      </h2>
-      <form className="store-form" onSubmit={handleSubmit}>
-        <div className="store-form-group">
-          <span className="store-description">매장 이름</span>
+    <div className="store-form-container">
+      <h2>{mode === "create" ? "매장 등록" : "매장 수정"}</h2>
+      <form onSubmit={handleSubmit} className="store-form">
+        <label>
+          매장 이름
           <input
-            type="text"
-            placeholder="입력하세요"
-            value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
+            name="storeName"
+            value={form.storeName}
+            onChange={handleChange}
             required
-            className="store-input"
           />
-        </div>
+        </label>
 
-        <div className="store-form-group">
-          <span className="store-description">주소</span>
-          <div className="store-address-wrapper">
-            <input
-              type="text"
-              placeholder="주소를 선택하세요"
-              value={address}
-              readOnly
-              required
-              className="store-input"
-            />
-            <button
-              type="button"
-              onClick={handleAddressSearch}
-              className="store-button"
-            >
-              검색
-            </button>
-          </div>
-        </div>
-
-        <div className="store-form-group">
-          <span className="store-description">전화번호</span>
+        <label>
+          주소
           <input
-            type="text"
-            placeholder="숫자만 입력"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            name="address"
+            value={form.address}
+            onChange={handleChange}
             required
-            className="store-input"
           />
-        </div>
+        </label>
 
-        <div className="store-form-group">
-          <span className="store-description">보증금 (원)</span>
+        <label>
+          전화번호
           <input
-            type="number"
-            placeholder="금액 (₩)"
-            value={deposit}
-            onChange={(e) => setDeposit(e.target.value)}
-            className="store-input"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            required
           />
-        </div>
+        </label>
 
-        <div className="store-form-group">
-          <span className="store-description">권리금 (원)</span>
+        <label>
+          보증금 (원)
+          <input name="deposit" value={form.deposit} onChange={handleChange} />
+        </label>
+
+        <label>
+          권리금 (원)
+          <input name="premium" value={form.premium} onChange={handleChange} />
+        </label>
+
+        <label>
+          월세 (원)
+          <input name="rent" value={form.rent} onChange={handleChange} />
+        </label>
+
+        <label>
+          관리비 (원)
           <input
-            type="number"
-            placeholder="금액 (₩)"
-            value={premium}
-            onChange={(e) => setPremium(e.target.value)}
-            className="store-input"
+            name="maintenance"
+            value={form.maintenance}
+            onChange={handleChange}
           />
-        </div>
+        </label>
 
-        <div className="store-form-group">
-          <span className="store-description">월세 (원)</span>
+        <label>
+          초기 투자 비용 (인터리어, 집기 등) (원)
           <input
-            type="number"
-            placeholder="금액 (₩)"
-            value={rent}
-            onChange={(e) => setRent(e.target.value)}
-            className="store-input"
+            name="initialInvestment"
+            value={form.initialInvestment}
+            onChange={handleChange}
           />
-        </div>
+        </label>
 
-        <div className="store-form-group">
-          <span className="store-description">관리비 (원)</span>
-          <input
-            type="number"
-            placeholder="금액 (₩)"
-            value={maintenance}
-            onChange={(e) => setMaintenance(e.target.value)}
-            className="store-input"
-          />
-        </div>
-
-        <div className="store-form-group">
-          <span className="store-description">초기 투자 비용 (원)</span>
-          <input
-            type="number"
-            placeholder="금액 (₩)"
-            value={initialInvestment}
-            onChange={(e) => setInitialInvestment(e.target.value)}
-            className="store-input"
-          />
-        </div>
-
-        <button type="submit" className="store-button-submit">
+        <button type="submit">
           {mode === "create" ? "등록하기" : "수정하기"}
         </button>
       </form>

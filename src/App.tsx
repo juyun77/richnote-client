@@ -4,7 +4,7 @@ import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
 // import SalesPage from "./pages/SalesPage";
-// import ReportsPage from "./pages/ReportsPage";
+import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ExpensePage from "./pages/ExpensePage";
 import StoreForm from "./components/StoreForm";
@@ -22,8 +22,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<LoginPage />} />
-        {/* <Route path="/sales" element={<SalesPage />} />
-        <Route path="/reports" element={<ReportsPage />} /> */}
+        {/* <Route path="/sales" element={<SalesPage />} /> */}
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/expenses" element={<ExpensePage />} />
         <Route path="/salesRecord" element={<SalesRecordPage />} />

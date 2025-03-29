@@ -1,0 +1,55 @@
+/* StoreForm.css */
+
+.store-form-container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+.store-form-container h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.store-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.store-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #555;
+}
+
+.store-form input {
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.store-form button {
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.store-form button:hover {
+  background-color: #43a047;
+}

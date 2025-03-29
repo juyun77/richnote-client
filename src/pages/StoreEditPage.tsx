@@ -1,3 +1,4 @@
+// StoreEditPage.tsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -16,7 +17,8 @@ export default function StoreEditPage() {
         const res = await axios.get(`${API_BASE_URL}/stores/${storeId}`, {
           withCredentials: true,
         });
-        setStoreData(res.data);
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+        setStoreData(data);
       } catch (err) {
         console.error("매장 정보 불러오기 실패:", err);
         navigate("/settings");
