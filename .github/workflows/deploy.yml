@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-frontend:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +23,10 @@ jobs:
         working-directory: .
 
       - name: Build Project
-        run: npm run build
+        run: |
+          REACT_APP_API_BASE_URL=${{ secrets.REACT_APP_API_BASE_URL }} \
+          REACT_APP_API_BASE_URL_KaKao=${{ secrets.REACT_APP_API_BASE_URL_KaKao }} \
+          npm run build
         working-directory: .
         continue-on-error: false
 
