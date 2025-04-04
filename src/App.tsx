@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
@@ -7,7 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ExpensePage from "./pages/ExpensePage";
-import StoreForm from "./components/StoreForm";
+//import StoreForm from "./components/StoreForm";
 import SalesRecordPage from "./pages/SalesRecordPage";
 import StoreRegistration from "./pages/StoreRegistration";
 import StoreEditPage from "./pages/StoreEditPage";
