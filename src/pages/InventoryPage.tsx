@@ -195,11 +195,11 @@ const InventoryPage = () => {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
+            <th>상품 번호</th> {/* 추가 */}
             <th>상품명</th>
             <th>보관</th>
             <th>판매가</th>
             <th>원가</th>
-            <th>수익</th>
             <th
               onClick={handleSort}
               style={{ cursor: "pointer", userSelect: "none" }}
@@ -212,18 +212,18 @@ const InventoryPage = () => {
         <tbody>
           {filteredProducts.length === 0 ? (
             <tr>
-              <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
+              <td colSpan={8} style={{ textAlign: "center", padding: "20px" }}>
                 등록된 상품이 없습니다.
               </td>
             </tr>
           ) : (
             filteredProducts.map((product, index) => (
               <tr key={index}>
+                <td>{product.id ?? "-"}</td> {/* 상품 번호 추가 */}
                 <td>{product.name}</td>
                 <td>{product.storageType}</td>
                 <td>{product.salePrice.toLocaleString()}원</td>
                 <td>{product.costPrice.toLocaleString()}원</td>
-                <td>{product.profit?.toLocaleString() ?? "-"}</td>
                 <td
                   style={{
                     color:
