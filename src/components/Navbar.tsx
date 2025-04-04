@@ -56,27 +56,34 @@ const Navbar = () => {
         </motion.div>
 
         <div style={styles.centerSection}>
-          {["dashboard", "salesRecord", "reports", "expenses", "settings"].map(
-            (menu, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Link to={`/${menu}`} style={styles.link}>
-                  {menu === "dashboard"
-                    ? "대시 보드"
-                    : menu === "salesRecord"
-                    ? "매출 기록"
-                    : menu === "reports"
-                    ? "분석 리포트"
-                    : menu === "expenses"
-                    ? "지출 관리"
-                    : "매장 설정"}
-                </Link>
-              </motion.div>
-            )
-          )}
+          {[
+            "dashboard",
+            "salesRecord",
+            "reports",
+            "expenses",
+            "inventory",
+            "settings",
+          ].map((menu, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Link to={`/${menu}`} style={styles.link}>
+                {menu === "dashboard"
+                  ? "대시 보드"
+                  : menu === "salesRecord"
+                  ? "매출 기록"
+                  : menu === "reports"
+                  ? "분석 리포트"
+                  : menu === "expenses"
+                  ? "지출 관리"
+                  : menu === "inventory"
+                  ? "재고 관리"
+                  : "매장 설정"}
+              </Link>
+            </motion.div>
+          ))}
         </div>
 
         <div style={styles.rightSection}>

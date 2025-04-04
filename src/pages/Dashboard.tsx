@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import React from "react";
+import axios from "axios";
 import {
   PieChart,
   Pie,
@@ -14,10 +15,10 @@ import {
   Legend,
 } from "recharts";
 
-interface Sale {
+interface SaleRecord {
   date: string;
-  category: string;
-  amount: number;
+  productName: string;
+  totalPrice: number;
 }
 
 const Dashboard = () => {
@@ -25,7 +26,6 @@ const Dashboard = () => {
   const [categorySalesData, setCategorySalesData] = useState<
     { name: string; value: number }[]
   >([]);
-  const [categories, setCategories] = useState<string[]>([]);
   const [maxSale, setMaxSale] = useState<{
     date: string;
     total: number;
@@ -37,86 +37,75 @@ const Dashboard = () => {
   const [totalSalesData, setTotalSalesData] = useState<
     { date: string; total: number }[]
   >([]);
-  const COLORS = ["#FF9800", "#4CAF50", "#2196F3"];
+  const COLORS = ["#FF9800", "#4CAF50", "#2196F3", "#9C27B0", "#FF5722"];
 
   useEffect(() => {
-    const rawData: Sale[] = [
-      { date: "2025-03-10", amount: 150000, category: "음료" },
-      { date: "2025-03-10", amount: 180000, category: "스낵" },
-      { date: "2025-03-10", amount: 210000, category: "기타" },
-      { date: "2025-02-15", amount: 220000, category: "음료" },
-      { date: "2025-02-15", amount: 240000, category: "스낵" },
-      { date: "2025-02-15", amount: 200000, category: "기타" },
-      { date: "2025-03-09", amount: 170000, category: "음료" },
-      { date: "2025-03-09", amount: 210000, category: "스낵" },
-      { date: "2025-03-09", amount: 190000, category: "기타" },
-      { date: "2025-03-08", amount: 250000, category: "음료" },
-      { date: "2025-03-08", amount: 200000, category: "스낵" },
-      { date: "2025-03-08", amount: 220000, category: "기타" },
-      { date: "2025-03-07", amount: 160000, category: "음료" },
-      { date: "2025-03-07", amount: 190000, category: "스낵" },
-      { date: "2025-03-07", amount: 180000, category: "기타" },
-      { date: "2025-03-06", amount: 230000, category: "음료" },
-      { date: "2025-03-06", amount: 220000, category: "스낵" },
-      { date: "2025-03-06", amount: 210000, category: "기타" },
-      { date: "2025-03-05", amount: 180000, category: "음료" },
-      { date: "2025-03-05", amount: 200000, category: "스낵" },
-      { date: "2025-03-05", amount: 170000, category: "기타" },
-      { date: "2025-03-04", amount: 240000, category: "음료" },
-      { date: "2025-03-04", amount: 230000, category: "스낵" },
-      { date: "2025-03-04", amount: 250000, category: "기타" },
-      { date: "2025-03-03", amount: 190000, category: "음료" },
-      { date: "2025-03-03", amount: 210000, category: "스낵" },
-      { date: "2025-03-03", amount: 200000, category: "기타" },
-    ];
+    const fetchSales = async () => {
+      const storeId = 1; // 실제 storeId 사용 시 로그인 정보 또는 props로 대체
+      const [year, month] = selectedMonth.split("-");
 
-    const filteredData = rawData.filter((sale) =>
-      sale.date.startsWith(selectedMonth)
-    );
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/sales`,
+          {
+            params: {
+              storeId,
+              startDate: `${year}-${month}-01`,
+              endDate: `${year}-${month}-31`,
+            },
+          }
+        );
 
-    const categorySales = filteredData.reduce((acc, sale) => {
-      const existing = acc.find((item) => item.name === sale.category);
-      if (existing) {
-        existing.value += sale.amount;
-      } else {
-        acc.push({ name: sale.category, value: sale.amount });
+        const data: SaleRecord[] = res.data;
+
+        const categoryMap: Record<string, number> = {};
+        const dailyMap: Record<string, number> = {};
+
+        data.forEach((record) => {
+          const dateKey = record.date;
+          dailyMap[dateKey] = (dailyMap[dateKey] || 0) + record.totalPrice;
+
+          const category = record.productName; // 카테고리 분류 기준이 있을 경우 수정
+          categoryMap[category] =
+            (categoryMap[category] || 0) + record.totalPrice;
+        });
+
+        const categoryList = Object.entries(categoryMap).map(
+          ([name, value]) => ({
+            name,
+            value,
+          })
+        );
+        setCategorySalesData(categoryList);
+
+        const totalList = Object.entries(dailyMap).map(([date, total]) => ({
+          date,
+          total,
+        }));
+        setTotalSalesData(totalList);
+
+        setMaxSale(
+          totalList.length > 0
+            ? totalList.reduce(
+                (max, sale) => (sale.total > max.total ? sale : max),
+                totalList[0]
+              )
+            : null
+        );
+        setMinSale(
+          totalList.length > 0
+            ? totalList.reduce(
+                (min, sale) => (sale.total < min.total ? sale : min),
+                totalList[0]
+              )
+            : null
+        );
+      } catch (error) {
+        console.error("매출 데이터 불러오기 실패:", error);
       }
-      return acc;
-    }, [] as { name: string; value: number }[]);
+    };
 
-    const uniqueCategories = Array.from(
-      new Set(rawData.map((sale) => sale.category))
-    );
-    setCategories(uniqueCategories);
-
-    const totalSales = filteredData.reduce((acc, sale) => {
-      const existing = acc.find((item) => item.date === sale.date);
-      if (existing) {
-        existing.total += sale.amount;
-      } else {
-        acc.push({ date: sale.date, total: sale.amount });
-      }
-      return acc;
-    }, [] as { date: string; total: number }[]);
-
-    setMaxSale(
-      totalSales.length > 0
-        ? totalSales.reduce(
-            (max, sale) => (sale.total > max.total ? sale : max),
-            totalSales[0]
-          )
-        : null
-    );
-    setMinSale(
-      totalSales.length > 0
-        ? totalSales.reduce(
-            (min, sale) => (sale.total < min.total ? sale : min),
-            totalSales[0]
-          )
-        : null
-    );
-    setCategorySalesData(categorySales);
-    setTotalSalesData(totalSales);
+    fetchSales();
   }, [selectedMonth]);
 
   return (
@@ -141,7 +130,7 @@ const Dashboard = () => {
       </label>
 
       <div style={styles.salesOverview}>
-        <h2>카테고리별 매출 비율</h2>
+        <h2>상품별 매출 비율</h2>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -151,7 +140,6 @@ const Dashboard = () => {
               cx="50%"
               cy="50%"
               outerRadius={100}
-              fill="#8884d8"
               label
             >
               {categorySalesData.map((entry, index) => (

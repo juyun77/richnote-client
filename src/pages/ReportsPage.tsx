@@ -1,4 +1,3 @@
-// ReportsPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../style/ReportsPage.css";
@@ -41,6 +40,7 @@ export default function ReportsPage() {
     null
   );
   const [variableCost, setVariableCost] = useState<number>(0);
+  const [dailyTarget, setDailyTarget] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -126,6 +126,7 @@ export default function ReportsPage() {
         setBreakevenTotal(Math.round(breakeven * targetMonths));
         setRequiredRevenue(Math.round(revenueToCoverCosts));
         setNetProfitPerMonth(Math.round(estimatedProfit));
+        setDailyTarget(Math.round(revenueToCoverCosts / 30));
 
         if (currentSales !== null) {
           const cost = currentSales * 0.7;
@@ -208,6 +209,10 @@ export default function ReportsPage() {
             <li>
               ✅ 필요한 월 매출 (마진률 30%):{" "}
               <strong>{requiredRevenue.toLocaleString()} 원</strong>
+            </li>
+            <li>
+              ✅ 하루 평균 목표 매출:{" "}
+              <strong>{dailyTarget?.toLocaleString()} 원</strong>
             </li>
             <li>
               ✅ 예상 순수익 (월 기준):{" "}

@@ -1,0 +1,45 @@
+name: Deploy Richnote Frontend to EC2
+
+on:
+  push:
+    branches:
+      - main # main 브랜치에 push 될 때 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.11.0"
+
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./richnote-client
+
+      - name: Build Project
+        run: npm run build
+        working-directory: ./richnote-client
+
+      - name: Deploy Build Files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./richnote-client/build/*"
+          target: "/home/ubuntu/richnote/richnote-client/build"
+
+      - name: Reload Nginx on EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo nginx -s reload

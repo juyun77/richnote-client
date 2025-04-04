@@ -12,6 +12,7 @@ import SalesRecordPage from "./pages/SalesRecordPage";
 import StoreRegistration from "./pages/StoreRegistration";
 import StoreEditPage from "./pages/StoreEditPage";
 import StoreDetailPage from "./pages/StoreDetailPage";
+import InventoryPage from "./pages/InventoryPage";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/store/register" element={<StoreRegistration />} />
         <Route path="/store/:storeId/edit" element={<StoreEditPage />} />
         <Route path="/store/:storeId" element={<StoreDetailPage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
       </Routes>
     </>
   );
