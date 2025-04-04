@@ -20,11 +20,11 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
-        working-directory: ./richnote-client
+        working-directory: .
 
       - name: Build Project
         run: npm run build
-        working-directory: ./richnote-client
+        working-directory: .
 
       - name: Deploy Build Files to EC2
         uses: appleboy/scp-action@v0.1.7
