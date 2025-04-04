@@ -110,7 +110,7 @@ export default function LoginPage() {
   };
 
   const handleKakaoLogin = () => {
-    window.location.href = "http://localhost:8081/api/users/kakao";
+    window.location.href = "http://13.124.25.138:8081/api/users/kakao";
   };
   return (
     <Container>
