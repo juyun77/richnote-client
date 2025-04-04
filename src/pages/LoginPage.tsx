@@ -98,7 +98,7 @@ export default function LoginPage() {
 
     // 로그인 요청 로직 (백엔드 연결 후 활성화)
     // try {
-    //   const response = await axios.post("https://api.example.com/login", {
+    //   const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/login`, {
     //     email,
     //     password,
     //   });
@@ -110,8 +110,9 @@ export default function LoginPage() {
   };
 
   const handleKakaoLogin = () => {
-    window.location.href = "http://13.124.25.138:8081/api/users/kakao";
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL_KAKAO}/api/users/kakao`;
   };
+
   return (
     <Container>
       <Card>
