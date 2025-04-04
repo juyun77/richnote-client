@@ -43,7 +43,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "./build/**"
-          target: "/home/ubuntu/richnote/richnote-client/build"
+          target: "/home/ubuntu/richnote/richnote-client"
 
       - name: Reload Nginx on EC2
         uses: appleboy/ssh-action@v0.1.10
