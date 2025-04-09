@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getDaysInMonth } from "date-fns"; // ✅ 월 마지막 날짜 계산
 import "../style/ReportsPage.css";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -14,6 +15,7 @@ interface Store {
 
 interface SalesRecord {
   totalPrice: number;
+  profitPrice: number;
 }
 
 interface VariableExpense {
@@ -32,15 +34,17 @@ export default function ReportsPage() {
   const [netProfitPerMonth, setNetProfitPerMonth] = useState<number | null>(
     null
   );
-  const [requiredRevenue, setRequiredRevenue] = useState<number | null>(null);
+  const [requiredProfit, setRequiredProfit] = useState<number | null>(null);
   const [currentSales, setCurrentSales] = useState<number | null>(null);
   const [currentProfit, setCurrentProfit] = useState<number | null>(null);
+  const [finalProfit, setFinalProfit] = useState<number | null>(null); // ✅ 최종 순이익
   const [achievedRate, setAchievedRate] = useState<number | null>(null);
   const [remainingToTarget, setRemainingToTarget] = useState<number | null>(
     null
   );
   const [variableCost, setVariableCost] = useState<number>(0);
   const [dailyTarget, setDailyTarget] = useState<number | null>(null);
+  const [profitRate, setProfitRate] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -66,22 +70,51 @@ export default function ReportsPage() {
   useEffect(() => {
     const fetchSales = async () => {
       if (!storeId) return;
+
       const paddedMonth = String(month).padStart(2, "0");
+      const lastDay = getDaysInMonth(new Date(year, month - 1));
+      const startDate = `${year}-${paddedMonth}-01`;
+      const endDate = `${year}-${paddedMonth}-${String(lastDay).padStart(
+        2,
+        "0"
+      )}`;
 
       try {
         const res = await axios.get(`${API_BASE_URL}/sales`, {
           params: {
             storeId,
-            startDate: `${year}-${paddedMonth}-01`,
-            endDate: `${year}-${paddedMonth}-31`,
+            startDate,
+            endDate,
           },
         });
 
-        const total = res.data.reduce(
-          (sum: number, r: SalesRecord) => sum + r.totalPrice,
+        const sales = res.data as SalesRecord[];
+
+        const totalSalesRaw = sales.reduce(
+          (sum, record) => sum + (record.totalPrice || 0),
           0
         );
-        setCurrentSales(total);
+        const totalSales = Math.round(totalSalesRaw * 0.977); // ✅ 카드수수료 2.3% 반영
+        const totalProfit = sales.reduce(
+          (sum, record) => sum + (record.profitPrice || 0),
+          0
+        );
+
+        setCurrentSales(totalSales);
+        setCurrentProfit(totalProfit);
+
+        if (totalProfit > 0) {
+          setFinalProfit(Math.round(totalProfit * 0.977)); // ✅ 최종 순이익 계산 (2.3% 반영)
+        } else {
+          setFinalProfit(null);
+        }
+
+        if (totalSales > 0) {
+          const calculatedProfitRate = (totalProfit / totalSales) * 100;
+          setProfitRate(Math.round(calculatedProfitRate));
+        } else {
+          setProfitRate(null);
+        }
       } catch (err) {
         console.error("매출 조회 실패:", err);
       }
@@ -119,33 +152,36 @@ export default function ReportsPage() {
         const investmentPerMonth = totalInvestment / targetMonths;
 
         const breakeven = monthlyFixedCosts + investmentPerMonth;
-        const revenueToCoverCosts = breakeven / 0.3;
-        const estimatedProfit = revenueToCoverCosts * 0.3 - breakeven;
-
         setBreakevenMonthly(Math.round(breakeven));
         setBreakevenTotal(Math.round(breakeven * targetMonths));
-        setRequiredRevenue(Math.round(revenueToCoverCosts));
-        setNetProfitPerMonth(Math.round(estimatedProfit));
-        setDailyTarget(Math.round(revenueToCoverCosts / 30));
 
-        if (currentSales !== null) {
-          const cost = currentSales * 0.7;
-          const profit = currentSales - cost;
-          setCurrentProfit(Math.round(profit));
+        if (currentProfit !== null) {
+          setRequiredProfit(Math.round(breakeven));
+          const achievedProfitRate = (currentProfit / breakeven) * 100;
+          const remainingProfitToTarget = Math.max(
+            0,
+            breakeven - currentProfit
+          );
 
-          const rate = (currentSales / revenueToCoverCosts) * 100;
-          setAchievedRate(Math.round(rate));
+          setAchievedRate(Math.round(achievedProfitRate));
+          setRemainingToTarget(Math.round(remainingProfitToTarget));
+          setDailyTarget(Math.round(breakeven / 30));
 
-          const remaining = Math.max(0, revenueToCoverCosts - currentSales);
-          setRemainingToTarget(Math.round(remaining));
+          const estimatedNetProfit = currentProfit - breakeven;
+          setNetProfitPerMonth(Math.round(estimatedNetProfit));
         }
       }
     }
-  }, [storeId, storeList, targetYears, currentSales, variableCost]);
+  }, [storeId, storeList, targetYears, currentProfit, variableCost]);
 
   return (
     <div className="reports-container">
       <h2>📊 매출 분석 리포트</h2>
+
+      {/* ✅ 카드수수료 안내 문구 */}
+      <p style={{ fontSize: "14px", color: "gray", marginBottom: "10px" }}>
+        ※ 카드 수수료 2.3%가 반영된 매출 및 최종 순이익입니다.
+      </p>
 
       <div className="filter-section">
         <div className="filter-row">
@@ -196,44 +232,60 @@ export default function ReportsPage() {
 
       <div className="result-box">
         <h3>손익분기점 계산 결과</h3>
-        {breakevenMonthly !== null && requiredRevenue !== null ? (
+        {breakevenMonthly !== null && requiredProfit !== null ? (
           <ul className="result-list">
             <li>
-              ✅ 매달 손익분기점 기준 고정비 + 변동비 + 투자비용:{" "}
+              ✅ 매달 손익분기점:{" "}
               <strong>{breakevenMonthly.toLocaleString()} 원</strong>
             </li>
             <li>
-              ✅ 손익분기점 도달까지 총 고정지출:{" "}
+              ✅ 총 고정지출:{" "}
               <strong>{breakevenTotal?.toLocaleString()} 원</strong>
             </li>
             <li>
-              ✅ 필요한 월 매출 (마진률 30%):{" "}
-              <strong>{requiredRevenue.toLocaleString()} 원</strong>
+              ✅ 필요한 월 순이익:{" "}
+              <strong>{requiredProfit?.toLocaleString()} 원</strong>
             </li>
             <li>
-              ✅ 하루 평균 목표 매출:{" "}
+              ✅ 하루 평균 목표 순이익:{" "}
               <strong>{dailyTarget?.toLocaleString()} 원</strong>
             </li>
             <li>
               ✅ 예상 순수익 (월 기준):{" "}
               <strong>{netProfitPerMonth?.toLocaleString()} 원</strong>
             </li>
+
             {currentSales !== null && (
+              <li>
+                📈 현재까지 누적 총매출:{" "}
+                <strong>{currentSales.toLocaleString()} 원</strong>
+              </li>
+            )}
+            {currentProfit !== null && (
+              <li>
+                💰 현재까지 누적 순이익:{" "}
+                <strong>{currentProfit.toLocaleString()} 원</strong>
+              </li>
+            )}
+            {finalProfit !== null && (
+              <li>
+                💵 카드 수수료 반영 후 최종 순이익 (2.3% 차감):{" "}
+                <strong>{finalProfit.toLocaleString()} 원</strong>
+              </li>
+            )}
+            {profitRate !== null && (
+              <li>
+                📊 총 매출 대비 순이익률: <strong>{profitRate}%</strong>
+              </li>
+            )}
+            {achievedRate !== null && (
               <>
                 <li>
-                  📦 선택한 기간의 매출:{" "}
-                  <strong>{currentSales.toLocaleString()} 원</strong>
-                </li>
-                <li>
-                  💰 추정 순수익 (30% 마진):{" "}
-                  <strong>{currentProfit?.toLocaleString()} 원</strong>
-                </li>
-                <li>
-                  🎯 목표 달성률:{" "}
+                  🎯 목표 달성률 (순이익 기준):{" "}
                   <strong>{achievedRate?.toLocaleString()}%</strong>
                 </li>
                 <li>
-                  📉 손익분기점까지 추가 필요 매출:{" "}
+                  📉 손익분기점까지 추가 필요 순이익:{" "}
                   <strong>{remainingToTarget?.toLocaleString()} 원</strong>
                 </li>
               </>

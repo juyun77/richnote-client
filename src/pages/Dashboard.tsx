@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import React from "react";
 import axios from "axios";
+import { getDaysInMonth } from "date-fns";
 import {
   PieChart,
   Pie,
@@ -22,7 +22,7 @@ interface SaleRecord {
 }
 
 const Dashboard = () => {
-  const [selectedMonth, setSelectedMonth] = useState<string>("2025-03");
+  const [selectedMonth, setSelectedMonth] = useState<string>("2025-04");
   const [categorySalesData, setCategorySalesData] = useState<
     { name: string; value: number }[]
   >([]);
@@ -37,22 +37,34 @@ const Dashboard = () => {
   const [totalSalesData, setTotalSalesData] = useState<
     { date: string; total: number }[]
   >([]);
-  const COLORS = ["#FF9800", "#4CAF50", "#2196F3", "#9C27B0", "#FF5722"];
+
+  const COLORS = [
+    "#FF9800",
+    "#4CAF50",
+    "#2196F3",
+    "#9C27B0",
+    "#FF5722",
+    "#00BCD4",
+    "#E91E63",
+    "#8BC34A",
+    "#FFC107",
+    "#9E9E9E",
+  ];
 
   useEffect(() => {
     const fetchSales = async () => {
-      const storeId = 1; // 실제 storeId 사용 시 로그인 정보 또는 props로 대체
+      const storeId = 1;
       const [year, month] = selectedMonth.split("-");
+
+      const lastDay = getDaysInMonth(new Date(Number(year), Number(month) - 1));
+      const startDate = `${year}-${month}-01`;
+      const endDate = `${year}-${month}-${String(lastDay).padStart(2, "0")}`;
 
       try {
         const res = await axios.get(
           `${process.env.REACT_APP_API_BASE_URL}/sales`,
           {
-            params: {
-              storeId,
-              startDate: `${year}-${month}-01`,
-              endDate: `${year}-${month}-31`,
-            },
+            params: { storeId, startDate, endDate },
           }
         );
 
@@ -62,43 +74,44 @@ const Dashboard = () => {
         const dailyMap: Record<string, number> = {};
 
         data.forEach((record) => {
-          const dateKey = record.date;
-          dailyMap[dateKey] = (dailyMap[dateKey] || 0) + record.totalPrice;
-
-          const category = record.productName; // 카테고리 분류 기준이 있을 경우 수정
-          categoryMap[category] =
-            (categoryMap[category] || 0) + record.totalPrice;
+          const price = record.totalPrice;
+          dailyMap[record.date] = (dailyMap[record.date] || 0) + price;
+          categoryMap[record.productName] =
+            (categoryMap[record.productName] || 0) + price;
         });
 
-        const categoryList = Object.entries(categoryMap).map(
-          ([name, value]) => ({
-            name,
-            value,
-          })
+        const sortedCategories = Object.entries(categoryMap).sort(
+          (a, b) => b[1] - a[1]
         );
+
+        const categoryList = sortedCategories
+          .slice(0, 10)
+          .map(([name, value]) => ({
+            name,
+            value: Math.round(value),
+          }));
+
         setCategorySalesData(categoryList);
 
         const totalList = Object.entries(dailyMap).map(([date, total]) => ({
           date,
-          total,
+          total: Math.round(total),
         }));
+
         setTotalSalesData(totalList);
 
         setMaxSale(
-          totalList.length > 0
-            ? totalList.reduce(
-                (max, sale) => (sale.total > max.total ? sale : max),
-                totalList[0]
-              )
-            : null
+          totalList.reduce(
+            (max, sale) => (sale.total > max.total ? sale : max),
+            totalList[0]
+          )
         );
+
         setMinSale(
-          totalList.length > 0
-            ? totalList.reduce(
-                (min, sale) => (sale.total < min.total ? sale : min),
-                totalList[0]
-              )
-            : null
+          totalList.reduce(
+            (min, sale) => (sale.total < min.total ? sale : min),
+            totalList[0]
+          )
         );
       } catch (error) {
         console.error("매출 데이터 불러오기 실패:", error);
@@ -130,8 +143,8 @@ const Dashboard = () => {
       </label>
 
       <div style={styles.salesOverview}>
-        <h2>상품별 매출 비율</h2>
-        <ResponsiveContainer width="100%" height={300}>
+        <h2>상품별 매출 비율 (상위 10개)</h2>
+        <ResponsiveContainer width="100%" height={350}>
           <PieChart>
             <Pie
               data={categorySalesData}
@@ -139,8 +152,8 @@ const Dashboard = () => {
               nameKey="name"
               cx="50%"
               cy="50%"
-              outerRadius={100}
-              label
+              outerRadius={120}
+              label={({ index }) => `${index! + 1}위`}
             >
               {categorySalesData.map((entry, index) => (
                 <Cell
@@ -149,7 +162,7 @@ const Dashboard = () => {
                 />
               ))}
             </Pie>
-            <Legend />
+            <Legend layout="vertical" verticalAlign="middle" align="right" />
           </PieChart>
         </ResponsiveContainer>
       </div>

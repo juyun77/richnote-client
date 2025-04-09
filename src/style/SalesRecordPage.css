@@ -1,23 +1,113 @@
-/* SalesRecordPage.css */
+/* 기본 설정 */
+.react-datepicker-wrapper {
+  width: auto;
+}
+
+.react-datepicker__input-container input {
+  width: 180px;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
 
 .sales-record-container {
-  padding: 100px 20px 40px;
+  padding: 80px 20px 40px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .sales-record-container h2 {
   text-align: center;
+  margin-bottom: 40px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+/* 필터/업로드 구역 */
+.sales-filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 30px;
-  font-size: 28px;
 }
 
-.sales-record-container input[type="file"] {
-  display: block;
-  margin: 0 auto 20px auto;
+.sales-filter-controls select,
+.sales-filter-controls input[type="file"],
+.sales-filter-controls .date-picker-input {
   padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
+.sales-filter-controls button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.sales-filter-controls button:hover {
+  background-color: #0056b3;
+}
+
+/* 업로드 정보 */
+.upload-info {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f0f9ff;
+  border: 1px solid #a0d8ff;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.upload-info p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+/* 매칭 실패 */
+.upload-errors {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff2f2;
+  border: 1px solid #ff9999;
+  border-radius: 8px;
+  color: #cc0000;
+}
+
+.upload-errors h4 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.upload-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.upload-errors li {
+  margin-bottom: 6px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.upload-errors li::before {
+  content: "⚠️";
+  position: absolute;
+  left: 0;
+}
+
+/* 테이블 */
 .sales-table {
   margin-top: 30px;
   overflow-x: auto;
@@ -26,18 +116,19 @@
 .sales-table table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  background-color: #ffffff;
 }
 
 .sales-table th,
 .sales-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
   text-align: center;
+  font-size: 15px;
 }
 
 .sales-table th {
-  background-color: #f0f0f0;
+  background-color: #f7f7f7;
   font-weight: bold;
 }
 
@@ -47,4 +138,62 @@
 
 .sales-table tr:hover {
   background-color: #f1f1f1;
+}
+
+/* 총 수익 */
+.total-profit {
+  margin-top: 30px;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  color: #28a745;
+}
+
+/* field + hint */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint {
+  font-size: 13px;
+  color: #666;
+  margin-left: 2px;
+}
+
+/* 기존 .sales-filter-controls 에 살짝 여유 */
+.sales-filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+/* 버튼 재사용 */
+.sales-filter-controls button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.sales-filter-controls button:hover {
+  background-color: #0056b3;
+}
+
+/* 파일 input 살짝 정리 */
+.file-label + input[type="file"] {
+  margin-top: 4px;
 }
